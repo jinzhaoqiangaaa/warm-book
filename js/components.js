@@ -864,5 +864,49 @@ const Components = {
     html += '<div class="empty-text" style="color:#999;font-size:14px;">' + text + '</div>';
     html += '</div>';
     return html;
+  },
+
+  // ==================== 快速记账组件 ====================
+
+  /**
+   * 渲染首页快速记账浮动按钮
+   * @returns {string} HTML 字符串
+   */
+  renderQuickRecordButton() {
+    return '<button class="quick-record-btn" onclick="App.openQuickRecord()" aria-label="快速记账">+</button>';
+  },
+
+  /**
+   * 渲染快速记账数字键盘
+   * @returns {string} HTML 字符串
+   */
+  renderQuickNumpad() {
+    var keys = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+    var html = '';
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var actionClass = (key === '⌫') ? ' action' : '';
+      html += '<button class="quick-num-btn' + actionClass + '" onclick="App.pressQuickKey(\'' + key + '\')">' + key + '</button>';
+    }
+    return html;
+  },
+
+  /**
+   * 渲染快速记账分类列表
+   * @param {Array} categories - 分类列表
+   * @param {number} selectedId - 当前选中的分类ID
+   * @returns {string} HTML 字符串
+   */
+  renderQuickCategories(categories, selectedId) {
+    var html = '';
+    for (var i = 0; i < categories.length; i++) {
+      var cat = categories[i];
+      var selectedClass = (cat.id === selectedId) ? ' selected' : '';
+      html += '<div class="quick-cat-item' + selectedClass + '" data-id="' + cat.id + '" onclick="App.selectQuickCategory(' + cat.id + ')">';
+      html += '<div class="cat-icon-wrap">' + getIcon(cat.icon) + '</div>';
+      html += '<div class="cat-name">' + cat.name + '</div>';
+      html += '</div>';
+    }
+    return html;
   }
 };

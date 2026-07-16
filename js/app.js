@@ -13,6 +13,11 @@ const App = {
   editingTransaction: null,
   currentAnalysisPeriod: 'month', // week | month | year
 
+  // 快速记账状态
+  quickAmount: '0',
+  quickCategory: null,
+  quickCategories: [],
+
   // ==================== 初始化 ====================
   async init() {
     try {
@@ -150,6 +155,9 @@ const App = {
 
       // 交易列表
       html += '<div class="home-transactions">' + Components.renderTransactionList(transactions) + '</div>';
+
+      // 快速记账浮动按钮
+      html += Components.renderQuickRecordButton();
 
       pageInner.innerHTML = html;
 
@@ -1042,6 +1050,156 @@ const App = {
       langBtn.addEventListener('click', function () {
         self.switchLanguage();
       });
+    }
+  },
+
+  // ==================== 快速记账 ====================
+
+  async openQuickRecord() {
+    try {
+      // 重置状态
+      this.quickAmount = '0';
+      this.quickCategory = null;
+
+      // 获取支出分类
+      var categories = await getCategories('expense');
+      this.quickCategories = categories;
+
+      // 默认选中第一个分类
+      if (categories.length > 0) {
+        this.quickCategory = categories[0].id;
+      }
+
+      // 渲染数字键盘
+      var numpadEl = document.getElementById('quick-numpad');
+      if (numpadEl) {
+        numpadEl.innerHTML = Components.renderQuickNumpad();
+      }
+
+      // 渲染分类
+      var catEl = document.getElementById('quick-categories');
+      if (catEl) {
+        catEl.innerHTML = Components.renderQuickCategories(categories, this.quickCategory);
+      }
+
+      // 更新金额显示
+      this.updateQuickAmountDisplay();
+
+      // 显示面板
+      var overlay = document.getElementById('quick-record-overlay');
+      var panel = document.getElementById('quick-record-panel');
+      if (overlay) overlay.style.display = 'block';
+      if (panel) {
+        panel.style.display = 'block';
+        requestAnimationFrame(function () {
+          panel.classList.add('show');
+        });
+      }
+    } catch (e) {
+      console.error('openQuickRecord failed:', e);
+    }
+  },
+
+  closeQuickRecord() {
+    var overlay = document.getElementById('quick-record-overlay');
+    var panel = document.getElementById('quick-record-panel');
+    if (panel) {
+      panel.classList.remove('show');
+      setTimeout(function () {
+        panel.style.display = 'none';
+      }, 300);
+    }
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+    // 重置状态
+    this.quickAmount = '0';
+    this.quickCategory = null;
+  },
+
+  pressQuickKey(key) {
+    var amount = this.quickAmount;
+
+    if (key === '⌫') {
+      // 删除键
+      if (amount.length > 1) {
+        amount = amount.slice(0, -1);
+      } else {
+        amount = '0';
+      }
+    } else if (key === '.') {
+      // 小数点
+      if (!amount.includes('.')) {
+        amount += '.';
+      }
+    } else {
+      // 数字键
+      if (amount === '0') {
+        amount = key;
+      } else if (amount.replace('.', '').length < 8) {
+        // 最多8位数字
+        amount += key;
+      }
+    }
+
+    this.quickAmount = amount;
+    this.updateQuickAmountDisplay();
+  },
+
+  updateQuickAmountDisplay() {
+    var display = document.getElementById('quick-amount-display');
+    if (display) {
+      display.textContent = this.quickAmount;
+    }
+  },
+
+  selectQuickCategory(categoryId) {
+    this.quickCategory = categoryId;
+    // 更新UI选中状态
+    var items = document.querySelectorAll('.quick-cat-item');
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var id = parseInt(item.dataset.id);
+      item.classList.toggle('selected', id === categoryId);
+    }
+  },
+
+  async saveQuickRecord() {
+    try {
+      var amount = parseFloat(this.quickAmount);
+      if (!amount || amount <= 0) {
+        Components.showToast('请输入金额', 'warning');
+        return;
+      }
+      if (!this.quickCategory) {
+        Components.showToast('请选择分类', 'warning');
+        return;
+      }
+
+      // 获取默认账户（第一个）
+      var accounts = await getAccounts();
+      var accountId = accounts.length > 0 ? accounts[0].id : 1;
+
+      var now = new Date();
+      var data = {
+        type: 'expense',
+        amount: amount,
+        categoryId: this.quickCategory,
+        accountId: accountId,
+        date: toDateStr(now),
+        time: toTimeStr(now),
+        note: ''
+      };
+
+      await addTransaction(data);
+      Components.showToast(t('common_success'));
+
+      // 关闭面板并刷新首页
+      this.closeQuickRecord();
+      this.renderHome();
+    } catch (e) {
+      console.error('saveQuickRecord failed:', e);
+      Components.showToast(t('common_error'), 'error');
     }
   }
 };

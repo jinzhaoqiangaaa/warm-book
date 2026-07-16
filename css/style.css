@@ -1672,3 +1672,174 @@ ol {
 .modal-cat-icon svg { width: 32px; height: 32px; }
 .ranking-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ranking-icon svg { width: 20px; height: 20px; }
+
+/* ========================================
+   19. 快速记账面板
+   ======================================== */
+.quick-record-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 90px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(232,115,74,0.4);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.quick-record-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 8px rgba(232,115,74,0.3);
+}
+
+.quick-record-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 16px 24px;
+  z-index: 2000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+}
+.quick-record-panel.show {
+  transform: translateY(0);
+}
+
+.quick-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.quick-record-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.quick-record-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  font-size: 16px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-amount-display {
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+  padding: 16px 0;
+  letter-spacing: 2px;
+}
+
+.quick-categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 8px 0 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.quick-cat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 2px solid transparent;
+  cursor: pointer;
+  min-width: 64px;
+  transition: all 0.2s;
+}
+.quick-cat-item.selected {
+  border-color: var(--primary);
+  background: rgba(232,115,74,0.08);
+}
+.quick-cat-item .cat-icon-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.quick-cat-item .cat-icon-wrap svg {
+  width: 24px;
+  height: 24px;
+}
+.quick-cat-item .cat-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.quick-cat-item.selected .cat-name {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.quick-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.quick-num-btn {
+  padding: 18px 0;
+  font-size: 24px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.quick-num-btn:active {
+  background: var(--border);
+}
+.quick-num-btn.wide {
+  grid-column: span 2;
+}
+.quick-num-btn.action {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.quick-save-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.quick-save-btn:active {
+  opacity: 0.9;
+}
