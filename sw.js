@@ -3,17 +3,18 @@
  * 缓存策略：Cache-First（静态资源）
  */
 
-const CACHE_NAME = 'warmbook-cache-v1';
-const CACHE_LIST = [
-  './',
-  './index.html',
-  './css/style.css',
-  './js/i18n.js',
-  './js/data.js',
-  './js/components.js',
-  './js/charts.js',
-  './js/app.js',
-  './manifest.json'
+const CACHE_NAME = 'warmbook-cache-v5';
+// 需要预缓存的文件列表
+const PRECACHE_URLS = [
+  'index.html',
+  'manifest.json',
+  'css/style.css?v=5',
+  'js/i18n.js?v=5',
+  'js/icons.js?v=5',
+  'js/data.js?v=5',
+  'js/components.js?v=5',
+  'js/charts.js?v=5',
+  'js/app.js?v=5'
 ];
 
 /**
@@ -24,8 +25,8 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function (cache) {
-        console.log('[SW] 正在缓存资源列表:', CACHE_LIST);
-        return cache.addAll(CACHE_LIST);
+        console.log('[SW] 正在缓存资源列表:', PRECACHE_URLS);
+        return cache.addAll(PRECACHE_URLS);
       })
       .then(function () {
         console.log('[SW] 所有资源缓存完成');

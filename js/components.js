@@ -62,7 +62,7 @@ const Components = {
 
     for (var i = 0; i < transactions.length; i++) {
       var trans = transactions[i];
-      var icon = trans.category ? trans.category.icon : '📌';
+      var iconKey = trans.category ? trans.category.icon : 'other';
       var catName = trans.category ? trans.category.name : '';
       var accName = trans.account ? trans.account.name : '';
       var detailParts = [];
@@ -71,16 +71,22 @@ const Components = {
       if (trans.note) detailParts.push(trans.note);
       var detailStr = detailParts.join(' \u00B7 ');
 
+      // 显示时间
+      var timeStr = trans.time || '';
+
       var amountClass = trans.type === 'income' ? 'income-amount' : 'expense-amount';
       var prefix = trans.type === 'income' ? '+' : '-';
 
       html += '<div class="transaction-item" onclick="App.editTransaction(' + trans.id + ')">';
-      html += '  <div class="transaction-icon">' + icon + '</div>';
+      html += '  <div class="transaction-icon">' + getIcon(iconKey) + '</div>';
       html += '  <div class="transaction-info">';
       html += '    <div class="t-name">' + (catName || t('cat_other')) + '</div>';
       html += '    <div class="t-detail">' + detailStr + '</div>';
       html += '  </div>';
-      html += '  <div class="transaction-amount ' + amountClass + '">' + prefix + formatMoney(trans.amount) + '</div>';
+      html += '  <div class="transaction-right">';
+      html += '    <div class="transaction-amount ' + amountClass + '">' + prefix + formatMoney(trans.amount) + '</div>';
+      html += '    <div class="transaction-time">' + timeStr + '</div>';
+      html += '  </div>';
       html += '</div>';
     }
 
@@ -137,6 +143,7 @@ const Components = {
   renderRecordPage(type, categories, accounts) {
     var isExpense = type === 'expense';
     var todayStr = toDateStr(new Date());
+    var nowTimeStr = toTimeStr(new Date());
 
     var html = '<div class="record-page">';
 
@@ -163,7 +170,7 @@ const Components = {
     for (var i = 0; i < categories.length; i++) {
       var cat = categories[i];
       html += '<div class="category-item" data-id="' + cat.id + '" onclick="App.selectCategory(' + cat.id + ')">';
-      html += '<div class="category-icon">' + cat.icon + '</div>';
+      html += '<div class="category-icon">' + getIcon(cat.icon) + '</div>';
       html += '<div class="category-name">' + cat.name + '</div>';
       html += '</div>';
     }
@@ -182,7 +189,7 @@ const Components = {
     for (var j = 0; j < accounts.length; j++) {
       var acc = accounts[j];
       html += '<div class="account-card" data-id="' + acc.id + '" onclick="App.selectAccount(' + acc.id + ')">';
-      html += '<span class="account-icon">' + acc.icon + '</span>';
+      html += '<span class="account-icon">' + getIcon(acc.icon) + '</span>';
       html += '<span class="account-name">' + acc.name + '</span>';
       html += '</div>';
     }
@@ -190,16 +197,22 @@ const Components = {
     html += '</div>';
     html += '</div>';
 
-    // 日期输入
-    html += '<div class="form-row">';
+    // 日期和时间（一行两列）
+    html += '<div class="form-row-datetime">';
+    html += '<div class="form-col">';
     html += '<label class="form-label">' + t('record_date') + '</label>';
-    html += '<input type="date" id="record-date" class="form-input" value="' + todayStr + '" onchange="App.updateRecordDate(this.value)">';
+    html += '<input type="date" id="record-date" class="form-input" value="' + todayStr + '">';
+    html += '</div>';
+    html += '<div class="form-col">';
+    html += '<label class="form-label">' + (I18N.currentLang === 'zh' ? '时间' : 'Time') + '</label>';
+    html += '<input type="time" id="record-time" class="form-input" value="' + nowTimeStr + '">';
+    html += '</div>';
     html += '</div>';
 
     // 备注输入
     html += '<div class="form-row">';
     html += '<label class="form-label">' + t('record_note') + '</label>';
-    html += '<input type="text" id="record-note" class="form-input" placeholder="' + t('record_note') + '" maxlength="100" oninput="App.updateRecordNote(this.value)">';
+    html += '<input type="text" id="record-note" class="form-input" placeholder="' + t('record_note') + '" maxlength="100">';
     html += '</div>';
 
     html += '</div>';
@@ -297,7 +310,7 @@ const Components = {
 
       html += '<div class="budget-item" onclick="App.editBudgetCategory(' + item.categoryId + ')">';
       html += '  <div class="budget-item-left">';
-      html += '    <span class="budget-item-icon">' + (item.categoryIcon || '📌') + '</span>';
+      html += '    <span class="budget-item-icon">' + getIcon(item.categoryIcon || 'other') + '</span>';
       html += '    <span class="budget-item-name">' + (item.categoryName || '') + '</span>';
       html += '  </div>';
       html += '  <div class="budget-item-center">';
@@ -339,7 +352,7 @@ const Components = {
 
     // 分类信息
     html += '<div class="modal-category-info">';
-    html += '<span class="modal-cat-icon">' + (category.icon || '📌') + '</span>';
+    html += '<span class="modal-cat-icon">' + getIcon(category.icon || 'other') + '</span>';
     html += '<span class="modal-cat-name">' + (category.name || '') + '</span>';
     html += '</div>';
 
@@ -450,7 +463,7 @@ const Components = {
 
       html += '<div class="ranking-item ' + rankClass + '">';
       html += '  <span class="ranking-num">' + (i + 1) + '</span>';
-      html += '  <span class="ranking-icon">' + (item.icon || '📌') + '</span>';
+      html += '  <span class="ranking-icon">' + getIcon(item.icon || 'other') + '</span>';
       html += '  <span class="ranking-name">' + item.name + '</span>';
       html += '  <span class="ranking-amount">' + formatMoney(item.amount) + '</span>';
       html += '</div>';

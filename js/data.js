@@ -13,34 +13,32 @@ const STORES = ['transactions', 'accounts', 'budgets', 'categories'];
 
 /** 默认账户数据 */
 const DEFAULT_ACCOUNTS = [
-  { id: 1, name: '现金', icon: '💵', type: 'cash', balance: 0 },
-  { id: 2, name: '银行卡', icon: '💳', type: 'bank', balance: 0 },
-  { id: 3, name: '支付宝', icon: '🔵', type: 'alipay', balance: 0 },
-  { id: 4, name: '微信', icon: '🟢', type: 'wechat', balance: 0 },
-  { id: 5, name: '其他', icon: '📱', type: 'other', balance: 0 },
+  { id: 1, name: '现金', icon: 'cash', type: 'cash', balance: 0 },
+  { id: 2, name: '银行卡', icon: 'bank', type: 'bank', balance: 0 },
+  { id: 3, name: '支付宝', icon: 'alipay', type: 'alipay', balance: 0 },
+  { id: 4, name: '微信', icon: 'wechat', type: 'wechat', balance: 0 },
 ];
 
-/** 默认支出分类（10个常用） */
+/** 默认支出分类（9个常用）- 卡通风格 */
 const DEFAULT_EXPENSE_CATEGORIES = [
-  { id: 1, name: '餐饮', icon: '🥘', type: 'expense', sortOrder: 1 },
-  { id: 2, name: '交通', icon: '🚗', type: 'expense', sortOrder: 2 },
-  { id: 3, name: '购物', icon: '🛍️', type: 'expense', sortOrder: 3 },
-  { id: 4, name: '住房', icon: '🏠', type: 'expense', sortOrder: 4 },
-  { id: 5, name: '娱乐', icon: '🎮', type: 'expense', sortOrder: 5 },
-  { id: 6, name: '医疗', icon: '💊', type: 'expense', sortOrder: 6 },
-  { id: 7, name: '教育', icon: '📚', type: 'expense', sortOrder: 7 },
-  { id: 8, name: '通讯', icon: '📱', type: 'expense', sortOrder: 8 },
-  { id: 9, name: '日用', icon: '🧴', type: 'expense', sortOrder: 9 },
-  { id: 10, name: '其他', icon: '📌', type: 'expense', sortOrder: 10 },
+  { id: 1, name: '餐饮', icon: 'food', type: 'expense', sortOrder: 1 },
+  { id: 2, name: '交通', icon: 'transport', type: 'expense', sortOrder: 2 },
+  { id: 3, name: '购物', icon: 'shopping', type: 'expense', sortOrder: 3 },
+  { id: 4, name: '住房', icon: 'housing', type: 'expense', sortOrder: 4 },
+  { id: 5, name: '娱乐', icon: 'entertainment', type: 'expense', sortOrder: 5 },
+  { id: 6, name: '医院', icon: 'hospital', type: 'expense', sortOrder: 6 },
+  { id: 7, name: '教育', icon: 'education', type: 'expense', sortOrder: 7 },
+  { id: 8, name: '通讯', icon: 'communication', type: 'expense', sortOrder: 8 },
+  { id: 9, name: '日用', icon: 'daily', type: 'expense', sortOrder: 9 },
 ];
 
-/** 默认收入分类（5个常用） */
+/** 默认收入分类（5个常用）- 卡通风格 */
 const DEFAULT_INCOME_CATEGORIES = [
-  { id: 11, name: '工资', icon: '💰', type: 'income', sortOrder: 1 },
-  { id: 12, name: '奖金', icon: '🏆', type: 'income', sortOrder: 2 },
-  { id: 13, name: '投资', icon: '📈', type: 'income', sortOrder: 3 },
-  { id: 14, name: '兼职', icon: '💼', type: 'income', sortOrder: 4 },
-  { id: 15, name: '其他', icon: '📌', type: 'income', sortOrder: 5 },
+  { id: 11, name: '工资', icon: 'salary', type: 'income', sortOrder: 1 },
+  { id: 12, name: '奖金', icon: 'bonus', type: 'income', sortOrder: 2 },
+  { id: 13, name: '投资', icon: 'investment', type: 'income', sortOrder: 3 },
+  { id: 14, name: '兼职', icon: 'parttime', type: 'income', sortOrder: 4 },
+  { id: 15, name: '其他', icon: 'other', type: 'income', sortOrder: 5 },
 ];
 
 // ==================== 数据库操作 ====================
@@ -164,12 +162,29 @@ function generateId() {
  * @param {Date} date
  * @returns {string}
  */
+/**
+ * 日期转字符串 YYYY-MM-DD
+ * @param {Date} date
+ * @returns {string}
+ */
 function toDateStr(date) {
   const d = date || new Date();
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * 时间转字符串 HH:mm
+ * @param {Date} date
+ * @returns {string}
+ */
+function toTimeStr(date) {
+  const d = date || new Date();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 /**
@@ -1096,16 +1111,31 @@ async function initAppData() {
     const db = await openDB();
     db.close();
 
-    // 检查是否已有账户数据
+    // 检查并更新账户数据（同步图标和名称）
     const accounts = await getAccounts();
     if (accounts.length === 0) {
       for (const account of DEFAULT_ACCOUNTS) {
         await addAccount(account);
       }
       console.log('[WarmBook] 默认账户已创建');
+    } else {
+      // 更新已有账户的图标和名称
+      const allDefaults = {};
+      for (const acc of DEFAULT_ACCOUNTS) {
+        allDefaults[acc.id] = acc;
+      }
+      let updated = false;
+      for (const acc of accounts) {
+        const def = allDefaults[acc.id];
+        if (def && (def.icon !== acc.icon || def.name !== acc.name)) {
+          await updateAccount(acc.id, { name: def.name, icon: def.icon });
+          updated = true;
+        }
+      }
+      if (updated) console.log('[WarmBook] 账户数据已更新');
     }
 
-    // 检查是否已有分类数据
+    // 检查并更新分类数据（同步图标和名称）
     const categories = await getCategories();
     if (categories.length === 0) {
       const allCategories = [...DEFAULT_EXPENSE_CATEGORIES, ...DEFAULT_INCOME_CATEGORIES];
@@ -1113,6 +1143,22 @@ async function initAppData() {
         await addCategory(category);
       }
       console.log('[WarmBook] 默认分类已创建');
+    } else {
+      // 更新已有分类的图标和名称
+      const allDefaults = {};
+      const allCats = [...DEFAULT_EXPENSE_CATEGORIES, ...DEFAULT_INCOME_CATEGORIES];
+      for (const cat of allCats) {
+        allDefaults[cat.id] = cat;
+      }
+      let updated = false;
+      for (const cat of categories) {
+        const def = allDefaults[cat.id];
+        if (def && (def.icon !== cat.icon || def.name !== cat.name)) {
+          await updateCategory(cat.id, { name: def.name, icon: def.icon });
+          updated = true;
+        }
+      }
+      if (updated) console.log('[WarmBook] 分类数据已更新');
     }
 
     console.log('[WarmBook] 数据初始化完成');

@@ -191,6 +191,9 @@ const App = {
         // 填充日期
         var dateInput = document.getElementById('record-date');
         if (dateInput) dateInput.value = trans.date;
+        // 填充时间
+        var timeInput = document.getElementById('record-time');
+        if (timeInput) timeInput.value = trans.time || toTimeStr();
         // 填充备注
         var noteInput = document.getElementById('record-note');
         if (noteInput) noteInput.value = trans.note || '';
@@ -207,6 +210,8 @@ const App = {
         }
         dateInput = document.getElementById('record-date');
         if (dateInput) dateInput.value = trans.date;
+        timeInput = document.getElementById('record-time');
+        if (timeInput) timeInput.value = trans.time || toTimeStr();
         noteInput = document.getElementById('record-note');
         if (noteInput) noteInput.value = trans.note || '';
       }
@@ -339,10 +344,12 @@ const App = {
       // 收集表单数据
       var amountInput = document.getElementById('amount-input');
       var dateInput = document.getElementById('record-date');
+      var timeInput = document.getElementById('record-time');
       var noteInput = document.getElementById('record-note');
 
       var amount = parseFloat(amountInput ? amountInput.value : 0);
       var date = dateInput ? dateInput.value : toDateStr();
+      var time = timeInput ? timeInput.value : toTimeStr();
       var note = noteInput ? noteInput.value : '';
 
       // 验证：金额必须大于0
@@ -367,6 +374,7 @@ const App = {
         categoryId: Number(this.selectedCategory),
         accountId: Number(this.selectedAccount),
         date: date,
+        time: time,
         note: note
       };
 

@@ -1521,6 +1521,8 @@ ol {
 
 .t-name { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
 .t-detail { font-size: 12px; color: var(--text-secondary); }
+.transaction-right { text-align: right; flex-shrink: 0; }
+.transaction-time { font-size: 11px; color: var(--text-light); margin-top: 2px; }
 .section-title { font-size: 16px; font-weight: 600; color: var(--text-primary); padding: 16px 16px 8px; }
 
 .home-summary { padding: 0 0 4px; }
@@ -1535,7 +1537,8 @@ ol {
 .amount-value { font-size: 36px; }
 .amount-input { width: 80%; text-align: center; font-size: 36px; font-weight: 700; border: none; border-bottom: 2px solid var(--primary); padding: 8px 0; outline: none; color: var(--text-primary); background: transparent; }
 .category-section { margin-bottom: 16px; }
-.category-icon { font-size: 28px; margin-bottom: 4px; }
+.category-icon { font-size: 28px; margin-bottom: 4px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.category-icon svg { width: 28px; height: 28px; }
 .account-selector-wrap { margin-bottom: 16px; }
 .account-selector { display: flex; gap: 12px; overflow-x: auto; padding: 8px 0; -webkit-overflow-scrolling: touch; }
 .account-card { display: flex; flex-direction: column; align-items: center; padding: 10px 16px; border-radius: var(--radius-sm); background: var(--card-bg); border: 2px solid transparent; min-width: 72px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
@@ -1544,8 +1547,11 @@ ol {
 .account-name { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
 .form-section { margin-bottom: 16px; }
 .form-row { display: flex; align-items: center; margin-bottom: 12px; }
+.form-row-datetime { display: flex; gap: 12px; margin-bottom: 12px; }
+.form-col { flex: 1; }
+.form-col .form-label { display: block; margin-bottom: 4px; }
 .form-label { font-size: 14px; font-weight: 500; color: var(--text-secondary); min-width: 60px; }
-.form-input { flex: 1; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 16px; color: var(--text-primary); background: var(--card-bg); outline: none; transition: border-color 0.2s; }
+.form-input { flex: 1; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-xs); font-size: 16px; color: var(--text-primary); background: var(--card-bg); outline: none; transition: border-color 0.2s; width: 100%; box-sizing: border-box; }
 .form-input:focus { border-color: var(--primary); }
 
 /* 预算页补充 */
@@ -1652,3 +1658,17 @@ ol {
 .report-card { background: var(--card-bg); border-radius: var(--radius-sm); padding: 16px; text-align: center; box-shadow: var(--shadow); }
 .report-card-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
 .report-card-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+
+/* ========================================
+   18. SVG 图标尺寸
+   ======================================== */
+.transaction-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 10px; background: rgba(232,115,74,0.1); }
+.transaction-icon svg { width: 24px; height: 24px; }
+.account-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.account-icon svg { width: 24px; height: 24px; }
+.budget-item-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.budget-item-icon svg { width: 20px; height: 20px; }
+.modal-cat-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.modal-cat-icon svg { width: 32px; height: 32px; }
+.ranking-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ranking-icon svg { width: 20px; height: 20px; }
