@@ -18,6 +18,11 @@ const App = {
   quickCategory: null,
   quickCategories: [],
 
+  // 首页搜索/筛选状态
+  homeSearchKeyword: '',
+  homeFilterCategory: 'all',
+  allHomeTransactions: [],
+
   // ==================== 初始化 ====================
   async init() {
     try {
@@ -141,6 +146,12 @@ const App = {
         transactions[ti].account = accountMap[transactions[ti].accountId] || null;
       }
 
+      // 缓存全部首页交易（用于搜索/筛选）
+      this.allHomeTransactions = transactions;
+
+      // 应用搜索和筛选
+      var filteredTransactions = this._applyHomeFilter(transactions);
+
       // 3. 渲染到page-inner
       var pageInner = document.querySelector('#home-page .page-inner');
       if (!pageInner) return;
@@ -150,18 +161,30 @@ const App = {
       // 概览卡片
       html += '<div class="home-summary">' + Components.renderHomeSummary(stats) + '</div>';
 
+      // 搜索栏和分类筛选器
+      html += Components.renderHomeSearchBar(categories, this.homeFilterCategory);
+
       // 最近记录标题
       html += '<div class="section-title" style="padding:12px 16px 8px;">' + t('home_recent') + '</div>';
 
       // 交易列表
-      html += '<div class="home-transactions">' + Components.renderTransactionList(transactions) + '</div>';
+      html += '<div class="home-transactions">' + Components.renderTransactionList(filteredTransactions) + '</div>';
 
       // 快速记账浮动按钮
       html += Components.renderQuickRecordButton();
 
       pageInner.innerHTML = html;
 
-      // 4. 更新头部标题
+      // 恢复搜索框内容
+      var searchInput = document.getElementById('home-search-input');
+      if (searchInput && this.homeSearchKeyword) {
+        searchInput.value = this.homeSearchKeyword;
+      }
+
+      // 4. 绑定交易列表事件（左滑删除 + 长按菜单）
+      this._bindTransactionListEvents(pageInner);
+
+      // 5. 更新头部标题
       var titleEl = document.querySelector('.app-title span[data-i18n="app.name"]');
       if (titleEl) {
         titleEl.textContent = t('home_title');
@@ -446,6 +469,10 @@ const App = {
       try {
         await deleteTransaction(id);
         Components.showToast(t('common_success'));
+        // 清空编辑状态（如果正在编辑此条记录）
+        if (this.editingTransaction && this.editingTransaction.id === id) {
+          this.editingTransaction = null;
+        }
         // 如果当前在首页，刷新
         if (this.currentPage === 'home') {
           this.renderHome();
@@ -455,6 +482,202 @@ const App = {
         Components.showToast(t('common_error'), 'error');
       }
     });
+  },
+
+  // 搜索交易记录（关键词）
+  async searchTransactions(keyword) {
+    this.homeSearchKeyword = keyword;
+    // 只重新渲染交易列表部分，不刷新整个页面
+    var filteredTransactions = this._applyHomeFilter(this.allHomeTransactions);
+    var listContainer = document.querySelector('.home-transactions');
+    if (listContainer) {
+      listContainer.innerHTML = Components.renderTransactionList(filteredTransactions);
+      // 重新绑定列表事件
+      this._bindTransactionListEvents(listContainer);
+    }
+  },
+
+  // 按分类筛选交易记录
+  async filterByCategory(categoryId) {
+    this.homeFilterCategory = categoryId;
+    // 重新渲染首页（需要更新筛选器高亮状态）
+    this.renderHome();
+  },
+
+  // 应用首页搜索和筛选（纯前端过滤）
+  _applyHomeFilter(transactions) {
+    var result = transactions;
+    // 按分类筛选
+    if (this.homeFilterCategory && this.homeFilterCategory !== 'all') {
+      var filterId = Number(this.homeFilterCategory);
+      var filtered = [];
+      for (var i = 0; i < result.length; i++) {
+        if (result[i].categoryId === filterId) {
+          filtered.push(result[i]);
+        }
+      }
+      result = filtered;
+    }
+    // 按关键词搜索
+    if (this.homeSearchKeyword) {
+      var kw = this.homeSearchKeyword.toLowerCase();
+      var searched = [];
+      for (var j = 0; j < result.length; j++) {
+        var trans = result[j];
+        var catName = trans.category ? trans.category.name : '';
+        var accName = trans.account ? trans.account.name : '';
+        var note = trans.note || '';
+        var amountStr = String(trans.amount);
+        if (catName.toLowerCase().indexOf(kw) >= 0 ||
+            accName.toLowerCase().indexOf(kw) >= 0 ||
+            note.toLowerCase().indexOf(kw) >= 0 ||
+            amountStr.indexOf(kw) >= 0) {
+          searched.push(trans);
+        }
+      }
+      result = searched;
+    }
+    return result;
+  },
+
+  // 绑定交易列表的左滑删除和长按菜单事件
+  _bindTransactionListEvents(container) {
+    var self = this;
+    var longPressTimer = null;
+    var currentSwipeItem = null;
+
+    // 获取 swipe-wrapper 列表
+    var wrappers = container.querySelectorAll('.swipe-wrapper');
+    for (var i = 0; i < wrappers.length; i++) {
+      (function (wrapper) {
+        var item = wrapper.querySelector('.transaction-item');
+        if (!item) return;
+
+        var startX = 0;
+        var startY = 0;
+        var currentX = 0;
+        var isSwiping = false;
+        var isLongPress = false;
+
+        // 触摸开始
+        item.addEventListener('touchstart', function (e) {
+          var touch = e.touches[0];
+          startX = touch.clientX;
+          startY = touch.clientY;
+          currentX = 0;
+          isSwiping = false;
+
+          // 关闭其他已滑开的项
+          if (currentSwipeItem && currentSwipeItem !== wrapper) {
+            self._resetSwipe(currentSwipeItem);
+          }
+
+          // 长按定时器
+          isLongPress = false;
+          longPressTimer = setTimeout(function () {
+            isLongPress = true;
+            var id = parseInt(item.dataset.id);
+            if (!isNaN(id)) {
+              var menuHtml = Components.renderTransactionActionMenu(id);
+              var menuWrapper = document.createElement('div');
+              menuWrapper.innerHTML = menuHtml;
+              var menuOverlay = menuWrapper.firstChild;
+              document.body.appendChild(menuOverlay);
+              requestAnimationFrame(function () {
+                menuOverlay.classList.add('action-menu-show');
+              });
+            }
+          }, 500);
+        }, { passive: true });
+
+        // 触摸移动
+        item.addEventListener('touchmove', function (e) {
+          var touch = e.touches[0];
+          var deltaX = touch.clientX - startX;
+          var deltaY = touch.clientY - startY;
+
+          // 判断是否为水平滑动
+          if (!isSwiping && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            isSwiping = true;
+            // 取消长按
+            if (longPressTimer) {
+              clearTimeout(longPressTimer);
+              longPressTimer = null;
+            }
+          }
+
+          if (isSwiping) {
+            e.preventDefault();
+            currentX = Math.min(0, deltaX);
+            if (currentX < -80) currentX = -80;
+            item.style.transition = 'none';
+            item.style.transform = 'translateX(' + currentX + 'px)';
+          }
+        }, { passive: false });
+
+        // 触摸结束
+        item.addEventListener('touchend', function (e) {
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+
+          if (isSwiping) {
+            // 判断滑动距离
+            if (currentX < -40) {
+              // 打开删除按钮
+              item.style.transition = 'transform 0.3s ease';
+              item.style.transform = 'translateX(-80px)';
+              currentSwipeItem = wrapper;
+            } else {
+              // 关闭
+              item.style.transition = 'transform 0.3s ease';
+              item.style.transform = 'translateX(0)';
+              currentSwipeItem = null;
+            }
+            return;
+          }
+
+          // 短按 -> 编辑
+          if (!isLongPress) {
+            var id = parseInt(item.dataset.id);
+            if (!isNaN(id)) {
+              self.editTransaction(id);
+            }
+          }
+        }, { passive: true });
+
+        // PC端点击支持
+        item.addEventListener('click', function (e) {
+          if (isLongPress) return;
+          var id = parseInt(item.dataset.id);
+          if (!isNaN(id)) {
+            self.editTransaction(id);
+          }
+        });
+      })(wrappers[i]);
+    }
+
+    // 点击空白区域关闭已滑开的项
+    document.addEventListener('touchstart', function (e) {
+      if (currentSwipeItem) {
+        var target = e.target;
+        if (!currentSwipeItem.contains(target)) {
+          self._resetSwipe(currentSwipeItem);
+          currentSwipeItem = null;
+        }
+      }
+    }, { passive: true });
+  },
+
+  // 重置滑动状态
+  _resetSwipe(wrapper) {
+    if (!wrapper) return;
+    var item = wrapper.querySelector('.transaction-item');
+    if (item) {
+      item.style.transition = 'transform 0.3s ease';
+      item.style.transform = 'translateX(0)';
+    }
   },
 
   // ==================== 预算页面 ====================

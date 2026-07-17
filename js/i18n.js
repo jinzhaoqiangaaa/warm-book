@@ -22,6 +22,10 @@ const I18N = {
     home_recent: '最近记录',
     home_no_records: '暂无记录',
     home_empty: '开始记一笔吧',
+    home_search: '搜索记录',
+    home_filter_all: '全部',
+    home_edit: '编辑',
+    home_menu_delete: '删除记录',
 
     // 记账
     record_title: '记一笔',
@@ -137,6 +141,10 @@ const I18N = {
     home_recent: 'Recent Records',
     home_no_records: 'No records yet',
     home_empty: 'Start recording',
+    home_search: 'Search records',
+    home_filter_all: 'All',
+    home_edit: 'Edit',
+    home_menu_delete: 'Delete Record',
 
     // 记账
     record_title: 'New Record',

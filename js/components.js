@@ -77,15 +77,19 @@ const Components = {
       var amountClass = trans.type === 'income' ? 'income-amount' : 'expense-amount';
       var prefix = trans.type === 'income' ? '+' : '-';
 
-      html += '<div class="transaction-item" onclick="App.editTransaction(' + trans.id + ')">';
-      html += '  <div class="transaction-icon">' + getIcon(iconKey) + '</div>';
-      html += '  <div class="transaction-info">';
-      html += '    <div class="t-name">' + (catName || t('cat_other')) + '</div>';
-      html += '    <div class="t-detail">' + detailStr + '</div>';
-      html += '  </div>';
-      html += '  <div class="transaction-right">';
-      html += '    <div class="transaction-amount ' + amountClass + '">' + prefix + formatMoney(trans.amount) + '</div>';
-      html += '    <div class="transaction-time">' + timeStr + '</div>';
+      // 左滑删除外层包裹
+      html += '<div class="swipe-wrapper">';
+      html += '  <div class="swipe-delete-btn" onclick="App.deleteTransaction(' + trans.id + ')">' + t('record_delete') + '</div>';
+      html += '  <div class="transaction-item" data-id="' + trans.id + '">';
+      html += '    <div class="transaction-icon">' + getIcon(iconKey) + '</div>';
+      html += '    <div class="transaction-info">';
+      html += '      <div class="t-name">' + (catName || t('cat_other')) + '</div>';
+      html += '      <div class="t-detail">' + detailStr + '</div>';
+      html += '    </div>';
+      html += '    <div class="transaction-right">';
+      html += '      <div class="transaction-amount ' + amountClass + '">' + prefix + formatMoney(trans.amount) + '</div>';
+      html += '      <div class="transaction-time">' + timeStr + '</div>';
+      html += '    </div>';
       html += '  </div>';
       html += '</div>';
     }
@@ -217,7 +221,12 @@ const Components = {
 
     html += '</div>';
 
-    // 5. 保存按钮
+    // 5. 删除按钮（仅编辑模式显示）
+    if (App.editingTransaction) {
+      html += '<button class="btn-delete-record" onclick="App.deleteTransaction(' + App.editingTransaction.id + ')">' + t('record_delete') + '</button>';
+    }
+
+    // 6. 保存按钮
     html += '<button class="btn-save" onclick="App.saveTransaction()">' + t('record_save') + '</button>';
 
     html += '</div>';
@@ -740,6 +749,76 @@ const Components = {
 
     html += '</div>';
     return html;
+  },
+
+  // ==================== 首页搜索/筛选组件 ====================
+
+  /**
+   * 渲染首页搜索栏和分类筛选器
+   * @param {Array} categories - 全部分类列表
+   * @param {string} currentFilter - 当前选中的分类ID，'all' 表示全部
+   * @returns {string} HTML 字符串
+   */
+  renderHomeSearchBar(categories, currentFilter) {
+    var html = '<div class="home-search-filter">';
+
+    // 搜索栏
+    html += '<div class="search-bar">';
+    html += '<input type="text" class="search-input" id="home-search-input" placeholder="' + t('home_search') + '" oninput="App.searchTransactions(this.value)">';
+    html += '</div>';
+
+    // 分类筛选器（水平滚动）
+    if (categories && categories.length > 0) {
+      html += '<div class="category-filter">';
+      // "全部"选项
+      var allActive = (!currentFilter || currentFilter === 'all') ? ' active' : '';
+      html += '<span class="filter-tag' + allActive + '" data-id="all" onclick="App.filterByCategory(\'all\')">' + t('home_filter_all') + '</span>';
+      for (var i = 0; i < categories.length; i++) {
+        var cat = categories[i];
+        var activeClass = (String(currentFilter) === String(cat.id)) ? ' active' : '';
+        html += '<span class="filter-tag' + activeClass + '" data-id="' + cat.id + '" onclick="App.filterByCategory(' + cat.id + ')">' + cat.name + '</span>';
+      }
+      html += '</div>';
+    }
+
+    html += '</div>';
+    return html;
+  },
+
+  /**
+   * 渲染交易记录操作菜单（编辑/删除）
+   * @param {number} transId - 交易记录ID
+   * @returns {string} HTML 字符串
+   */
+  renderTransactionActionMenu(transId) {
+    var html = '<div class="action-menu-overlay" onclick="Components.closeActionMenu()">';
+    html += '<div class="action-menu" onclick="event.stopPropagation()">';
+    html += '<div class="action-menu-item action-menu-edit" onclick="Components.closeActionMenu();App.editTransaction(' + transId + ')">';
+    html += '<span class="action-menu-icon">' + (I18N.currentLang === 'zh' ? '\u270F\uFE0F' : '\u270F\uFE0F') + '</span>';
+    html += '<span>' + t('home_edit') + '</span>';
+    html += '</div>';
+    html += '<div class="action-menu-item action-menu-delete" onclick="Components.closeActionMenu();App.deleteTransaction(' + transId + ')">';
+    html += '<span class="action-menu-icon">' + (I18N.currentLang === 'zh' ? '\uD83D\uDDD1\uFE0F' : '\uD83D\uDDD1\uFE0F') + '</span>';
+    html += '<span>' + t('home_menu_delete') + '</span>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    return html;
+  },
+
+  /**
+   * 关闭操作菜单
+   */
+  closeActionMenu() {
+    var overlay = document.querySelector('.action-menu-overlay');
+    if (overlay) {
+      overlay.classList.add('action-menu-hide');
+      setTimeout(function () {
+        if (overlay.parentNode) {
+          overlay.parentNode.removeChild(overlay);
+        }
+      }, 200);
+    }
   },
 
   // ==================== 通用组件 ====================

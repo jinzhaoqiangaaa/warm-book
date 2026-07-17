@@ -203,51 +203,63 @@ ol {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: rgba(255, 245, 237, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 245, 237, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-around;
-  align-items: flex-start;
-  padding: 6px 0 8px;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0));
+  align-items: center;
+  padding: 8px 8px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0));
   z-index: 100;
+  height: auto;
+  min-height: 72px;
 }
 
-#bottom-nav .nav-tab {
+#bottom-nav .nav-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 4px 0;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
   min-width: 56px;
-  transition: transform 0.2s ease;
-  background: none;
+  border: none;
+  background: transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-#bottom-nav .nav-tab .tab-icon {
-  font-size: 24px;
+#bottom-nav .nav-btn:active {
+  background: rgba(232,115,74,0.08);
+  transform: scale(0.95);
+}
+
+#bottom-nav .nav-btn .nav-icon {
+  font-size: 26px;
   line-height: 1;
-  transition: transform 0.2s ease;
+  display: block;
 }
 
-#bottom-nav .nav-tab .tab-label {
-  font-size: 11px;
+#bottom-nav .nav-btn .nav-label {
+  font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.2;
-  transition: color 0.2s ease;
+  font-weight: 500;
 }
 
-#bottom-nav .nav-tab.active {
-  transform: scale(1.05);
+#bottom-nav .nav-btn.active {
+  background: rgba(232,115,74,0.1);
 }
 
-#bottom-nav .nav-tab.active .tab-icon {
+#bottom-nav .nav-btn.active .nav-icon {
   transform: scale(1.1);
 }
 
-#bottom-nav .nav-tab.active .tab-label {
+#bottom-nav .nav-btn.active .nav-label {
   color: var(--primary);
   font-weight: 600;
 }
@@ -263,6 +275,8 @@ ol {
   box-shadow: var(--shadow);
   padding: 20px;
   margin-bottom: 16px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .summary-grid {
@@ -276,6 +290,7 @@ ol {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 .summary-amount {
@@ -283,6 +298,10 @@ ol {
   font-weight: 700;
   line-height: 1.3;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .summary-label {
@@ -1650,6 +1669,8 @@ ol {
 
 /* header补充 */
 .app-header { display: flex; align-items: center; justify-content: space-between; }
+.app-title { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.app-title-icon { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
 .lang-toggle-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; background: transparent; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
 .lang-toggle-btn:active { background: rgba(232,115,74,0.1); }
 
@@ -1842,4 +1863,188 @@ ol {
 }
 .quick-save-btn:active {
   opacity: 0.9;
+}
+
+/* ========================================
+   20. 记账页删除按钮
+   ======================================== */
+.btn-delete-record {
+  width: 100%;
+  padding: 14px;
+  background: var(--danger);
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.25);
+  margin-bottom: 8px;
+  border: none;
+  cursor: pointer;
+}
+.btn-delete-record:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(229, 57, 53, 0.2);
+}
+
+/* ========================================
+   21. 左滑删除
+   ======================================== */
+.swipe-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.swipe-delete-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  background: var(--danger);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  z-index: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.swipe-delete-btn:active {
+  background: #C62828;
+}
+.swipe-wrapper .transaction-item {
+  position: relative;
+  z-index: 2;
+  background: var(--card-bg);
+  touch-action: pan-y;
+  margin-bottom: 0;
+}
+
+/* ========================================
+   22. 搜索栏
+   ======================================== */
+.home-search-filter {
+  padding: 0 16px 8px;
+}
+.search-bar {
+  position: relative;
+  margin-bottom: 10px;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 16px;
+  padding-left: 36px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.search-input:focus {
+  border-color: var(--primary);
+}
+.search-input::placeholder {
+  color: var(--text-light);
+}
+
+/* ========================================
+   23. 分类筛选器
+   ======================================== */
+.category-filter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.category-filter::-webkit-scrollbar {
+  display: none;
+}
+.filter-tag {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.filter-tag:active {
+  transform: scale(0.96);
+}
+.filter-tag.active {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: var(--primary);
+}
+
+/* ========================================
+   24. 操作菜单（长按弹出）
+   ======================================== */
+.action-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.action-menu-overlay.action-menu-show {
+  opacity: 1;
+}
+.action-menu-overlay.action-menu-hide {
+  opacity: 0;
+}
+.action-menu {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 8px 0;
+  width: 200px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+}
+.action-menu-overlay.action-menu-show .action-menu {
+  transform: scale(1);
+}
+.action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.action-menu-item:active {
+  background: var(--bg);
+}
+.action-menu-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+.action-menu-delete {
+  color: var(--danger);
+}
+.action-menu-delete .action-menu-icon {
+  color: var(--danger);
 }
