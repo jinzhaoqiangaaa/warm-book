@@ -881,6 +881,11 @@ const Components = {
     var modal = wrapper.firstChild;
     document.body.appendChild(modal);
 
+    // 触发显示动画
+    setTimeout(function () {
+      modal.classList.add('modal-show');
+    }, 50);
+
     // 绑定确认按钮事件
     var confirmBtn = document.getElementById('confirm-ok-btn');
     if (confirmBtn && typeof onConfirm === 'function') {

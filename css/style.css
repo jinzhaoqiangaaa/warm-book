@@ -1647,7 +1647,11 @@ ol {
 .confirm-dialog { background: var(--card-bg); border-radius: var(--radius); padding: 24px; max-width: 300px; width: 85%; text-align: center; transform: scale(0.9); transition: transform 0.2s; }
 .modal-overlay.modal-show .confirm-dialog { transform: scale(1); }
 .confirm-message { font-size: 15px; color: var(--text-primary); margin-bottom: 20px; line-height: 1.5; }
-.confirm-actions { display: flex; gap: 12px; }
+.confirm-actions { display: flex; gap: 12px; justify-content: center; }
+.confirm-actions .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: transparent; font-size: 15px; color: var(--text-secondary); cursor: pointer; }
+.confirm-actions .btn-cancel:active { background: var(--bg); }
+.confirm-actions .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+.confirm-actions .btn-confirm:active { opacity: 0.85; }
 
 /* 日期分组补充 */
 .date-header { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px; }
